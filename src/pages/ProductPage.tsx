@@ -17,16 +17,21 @@ const ProductPage = () => {
   const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
+    console.log('Product ID from URL:', id);
     if (id) {
-      fetchProductById(id);
+      console.log('Fetching product with ID:', id);
+      fetchProductById(id).catch(err => {
+        console.error('Error fetching product:', err);
+      });
     }
   }, [id]);
 
   useEffect(() => {
+    console.log('Current product state:', { currentProduct, isLoading, error });
     if (currentProduct) {
       document.title = `${currentProduct.name} | Luxe`;
     }
-  }, [currentProduct]);
+  }, [currentProduct, isLoading, error]);
 
   const handleQuantityChange = (amount: number) => {
     const newQuantity = quantity + amount;

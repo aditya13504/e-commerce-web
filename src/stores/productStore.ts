@@ -49,24 +49,41 @@ export const useProductStore = create<ProductsState>((set, get) => ({
   },
 
   fetchProductById: async (id: string) => {
+    console.log('Starting fetchProductById for ID:', id);
     set({ isLoading: true, error: null, currentProduct: null });
     try {
+      console.log('Making Supabase request for product:', id);
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw error;
-      set({ currentProduct: data, isLoading: false });
+      console.log('Supabase raw response data:', data);
+      console.log('Supabase raw response error:', error);
+
+      if (error) {
+        console.error('Supabase query error:', error);
+        throw error;
+      }
+
+      if (!data) {
+        console.warn('No product found for ID:', id);
+        set({ currentProduct: null, isLoading: false, error: 'Product not found' });
+        return;
+      }
+
+      console.log('Product data received:', data);
+      set({ currentProduct: data, isLoading: false, error: null });
     } catch (error) {
       const errorMessage = error instanceof Error 
         ? error.message
-        : 'Failed to connect to the server. Please check your internet connection and try again.';
-      console.error('Error fetching product:', error);
+        : 'Failed to fetch product.';
+      console.error('Error in fetchProductById:', error);
       set({ 
         error: errorMessage,
-        isLoading: false 
+        isLoading: false,
+        currentProduct: null
       });
     }
   },
